@@ -1,11 +1,10 @@
-import os, time, smtplib, re
+import os, smtplib, re
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 from email.mime.text import MIMEText
 from email.utils import formataddr, formatdate
 from dotenv import load_dotenv
-import schedule
 from urllib.parse import urljoin
 
 load_dotenv()
@@ -141,7 +140,3 @@ def run_once():
 # ===== 메인 루프 =====
 if __name__ == "__main__":
     run_once()
-        # schedule.every(CHECK_MIN).minutes.do(run_once)
-        # while True:
-        #     schedule.run_pending()
-        #     time.sleep(1)
