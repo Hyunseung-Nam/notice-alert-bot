@@ -1,37 +1,37 @@
-import os, smtplib, re                   # 운영체제, 메일 송신, 정규식 관련 라이브러리
-import pandas as pd                      # 데이터프레임(엑셀처럼) 다루는 라이브러리
-import requests                          # HTTP 요청 라이브러리
-from bs4 import BeautifulSoup            # HTML 파싱 라이브러리
-from email.mime.text import MIMEText     # 메일 본문을 MIME 형식으로 감쌀 때 사용
-from email.utils import formataddr, formatdate  # 메일 발신자, 날짜 헤더 포맷
-from dotenv import load_dotenv           # .env 파일에서 환경변수 불러오기
-from urllib.parse import urljoin         # 상대경로 → 절대경로 URL로 변환
-import logging                           # 로깅 라이브러리
+import os, smtplib, re                   
+import pandas as pd                      
+import requests                          
+from bs4 import BeautifulSoup            
+from email.mime.text import MIMEText     
+from email.utils import formataddr, formatdate  
+from dotenv import load_dotenv           
+from urllib.parse import urljoin         
+import logging                           
 
-load_dotenv()                            # .env 파일 읽어서 환경변수 등록
+load_dotenv()                            
 
 # ============================
 # 로그 설정
 # ============================
 logging.basicConfig(
-    level=logging.INFO,                         # INFO 레벨 이상 로그 기록
-    format='%(asctime)s %(levelname)-8s %(message)s',  # 로그 출력 형식
-    datefmt='%Y-%m-%d %H:%M:%S',                # 로그에 표시할 시간 포맷
-    filename='posts.log',                       # 로그를 남길 파일 이름
-    filemode='a'                                # 이어쓰기 모드
+    level=logging.INFO,                         
+    format='%(asctime)s %(levelname)-8s %(message)s',  
+    datefmt='%Y-%m-%d %H:%M:%S',                
+    filename='posts.log',                       
+    filemode='a'                                
 )
-logger = logging.getLogger(__name__)            # 현재 모듈 이름으로 로거 생성
+logger = logging.getLogger(__name__)            
 
 # =========================
 # 변수 설정
 # =========================
-MENU_NO = "200361"   # 게시판 고유 번호
-TARGET_URL = f"https://www.khu.ac.kr/kor/user/bbs/BMSR00040/list.do?menuNo={MENU_NO}"   # 채용 공고 목록 페이지
-ITEM_SELECTOR = "table tbody tr"         # 각 공고가 있는 테이블 행
-TITLE_SELECTOR = "td a"                  # 공고 제목이 있는 a 태그
-HREF_SELECTOR  = 'td a'                  # 링크도 a 태그
-DATE_SELECTOR  = "td:nth-child(4)"       # 게시일이 있는 4번째 열
-CSV_PATH = "posts.csv"                   # 저장할 CSV 파일 경로
+MENU_NO = "200361"   
+TARGET_URL = f"https://www.khu.ac.kr/kor/user/bbs/BMSR00040/list.do?menuNo={MENU_NO}"   
+ITEM_SELECTOR = "table tbody tr"         
+TITLE_SELECTOR = "td a"                  
+HREF_SELECTOR  = 'td a'                  
+DATE_SELECTOR  = "td:nth-child(4)"       
+CSV_PATH = "posts.csv"                   
 
 # =================================================
 # Gmail 환경변수 (운영 시 .env 파일로 관리)
@@ -59,17 +59,16 @@ def scrape_post_list():
             title = item.select_one(TITLE_SELECTOR).get_text(strip=True)
             raw_href = item.select_one(HREF_SELECTOR).get("href") or ""
         except AttributeError:
-            # 제목이나 링크 태그가 아예 없으면 이 게시물은 스킵
             logger.warning("제목 또는 링크 태그가 없으므로 해당 게시물 스킵")
             continue
 
         # URL 처리
         try:
-            if raw_href.startswith("javascript"): # 자바스크립트 함수 호출 형태인 경우 ex) <a href="javascript:view('319598','')">채용 공고 제목</a>
-                post_id = re.search(r"(?:view|fnView|fn_view)\(\s*['\"]([^'\"]+)['\"]", raw_href).group(1) # id 추출
+            if raw_href.startswith("javascript"): 
+                post_id = re.search(r"(?:view|fnView|fn_view)\(\s*['\"]([^'\"]+)['\"]", raw_href).group(1) 
                 url = f"https://www.khu.ac.kr/kor/user/bbs/BMSR00040/view.do?boardId={post_id}&menuNo={MENU_NO}"
             elif raw_href.startswith("/"):
-                url = urljoin(TARGET_URL, raw_href) # 상대경로 -> 절대경로
+                url = urljoin(TARGET_URL, raw_href)
             else:
                 url = raw_href
         except (AttributeError, IndexError):
@@ -79,14 +78,14 @@ def scrape_post_list():
         # 날짜 추출 
         try:
             date = item.select_one(DATE_SELECTOR).get_text(strip=True)
-        except (AttributeError, TypeError): # 날짜가 없는 게시판이 있을 수 있음
+        except (AttributeError, TypeError):
             logger.info(f"날짜 없음: title='{title}'")
             date = ""
 
         rows.append({"title": title, "url": url, "posted_at": date})
         logger.debug(f"게시물 추가: title='{title}', url='{url}', date='{date}'")
 
-    df = pd.DataFrame(rows).drop_duplicates(subset=["url"])  # 중복 URL 제거
+    df = pd.DataFrame(rows).drop_duplicates(subset=["url"])
     logger.info(f"총 {len(df)}개의 게시물 수집 완료")
     return df
 
@@ -148,14 +147,14 @@ def send_post_email_alert(diff_df):
 # ===== 전체 작업 1회 실행 =====
 def run_once():
     logger.info("=== 전체 작업 실행 시작 ===")
-    new_df = scrape_post_list()                       # 새로 크롤링한 목록
-    old_df = load_history_from_csv()                      # 기존 저장 목록
-    diff_df = get_new_posts(new_df, old_df)           # 신규 항목만 추출
-    send_post_email_alert(diff_df)                          # 메일 발송
+    new_df = scrape_post_list()                       
+    old_df = load_history_from_csv()                      
+    diff_df = get_new_posts(new_df, old_df)          
+    send_post_email_alert(diff_df)                         
     # 신규 항목까지 포함해 CSV 저장
     save_history_to_csv(pd.concat([old_df, diff_df], ignore_index=True).drop_duplicates(subset=["url"]))
     logger.info("=== 전체 작업 실행 완료 ===")
 
 # ===== 메인 루프 =====
 if __name__ == "__main__":
-    run_once()                                   # 스크립트 직접 실행 시 run_once 실행
+    run_once()                              
