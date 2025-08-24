@@ -1,7 +1,7 @@
 import os, smtplib, re                   
 import pandas as pd                      
-import requests                          
-from bs4 import BeautifulSoup            
+import requests
+from bs4 import BeautifulSoup                               
 from email.mime.text import MIMEText     
 from email.utils import formataddr, formatdate  
 from dotenv import load_dotenv           
