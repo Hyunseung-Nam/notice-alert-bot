@@ -5,7 +5,8 @@ from bs4 import BeautifulSoup
 from email.mime.text import MIMEText     
 from email.utils import formataddr, formatdate  
 from dotenv import load_dotenv           
-from urllib.parse import urljoin         
+from urllib.parse import urljoin
+from urllib.parse import urlencode    
 import logging                           
 
 load_dotenv()                            
@@ -24,9 +25,9 @@ logger = logging.getLogger(__name__)
 
 # =========================
 # 변수 설정
-# =========================
-MENU_NO = "200361"   
-TARGET_URL = f"https://www.khu.ac.kr/kor/user/bbs/BMSR00040/list.do?menuNo={MENU_NO}"   
+# ========================= 
+PARAMS = {"menuNo": "200361"}
+TARGET_URL = f"https://www.khu.ac.kr/kor/user/bbs/BMSR00040/list.do?{urlencode(PARAMS)}"   
 ITEM_SELECTOR = "table tbody tr"         
 TITLE_SELECTOR = "td a"                  
 HREF_SELECTOR  = 'td a'                  
@@ -65,8 +66,9 @@ def scrape_post_list():
         # URL 처리
         try:
             if raw_href.startswith("javascript"): 
-                post_id = re.search(r"(?:view|fnView|fn_view)\(\s*['\"]([^'\"]+)['\"]", raw_href).group(1) 
-                url = f"https://www.khu.ac.kr/kor/user/bbs/BMSR00040/view.do?boardId={post_id}&menuNo={MENU_NO}"
+                post_id = re.search(r"(?:view|fnView|fn_view)\(\s*['\"]([^'\"]+)['\"]", raw_href).group(1)
+                params = {"boardId": post_id, **PARAMS}
+                url = f"https://www.khu.ac.kr/kor/user/bbs/BMSR00040/view.do?{urlencode(params)}"
             elif raw_href.startswith("/"):
                 url = urljoin(TARGET_URL, raw_href)
             else:
