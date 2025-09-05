@@ -6,10 +6,21 @@ from email.mime.text import MIMEText
 from email.utils import formataddr, formatdate  
 from dotenv import load_dotenv           
 from urllib.parse import urljoin
-from urllib.parse import urlencode    
+from urllib.parse import urlencode
+from pathlib import Path
 import logging                           
 
-load_dotenv()                            
+# ====== .env 로드 ======
+ROOT = Path(__file__).resolve().parent
+ENV_PATH = ROOT / ".env"
+load_dotenv(dotenv_path=ENV_PATH, encoding="utf-8", override=True) 
+
+def env(name: str) -> str:
+    raw = os.getenv(name) or os.getenv("\ufeff"+name) or ""
+    return raw.replace("\u200b", "").strip()           
+
+def clean_host(h: str) -> str:
+    return re.sub(r"[^A-Za-z0-9\.\-]", "", (h or "").replace("\ufeff","").replace("\u200b","").strip())                           
 
 # ============================
 # 로그 설정
