@@ -31,10 +31,15 @@
 git clone https://github.com/Hyunseung-Nam/notice-alert-bot.git
 cd notice-alert-bot
 
-2. 라이브러리 설치
+2. 가상환경 설정(선택사항이지만 권장)
+python -m venv .venv
+source .venv/bin/activate    # Mac/Linux
+.venv\Scripts\activate       # Windows
+
+3. 라이브러리 설치
 pip install -r requirements.txt
 
-3. 환경변수 설정 (.env 파일 생성)
+4. 환경변수 설정 (.env 파일 생성)
 # --- Windows PowerShell 5.1 (UTF-8 BOM 없음으로 저장) ---
 $utf8NoBOM = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText(".env", @"
@@ -54,7 +59,7 @@ SMTP_PASS=your_16char_app_password   # Gmail '앱 비밀번호' (일반 비번 X
 MAIL_TO=target@email.com
 EOF
 
-4. 실행
+5. 실행
 python main.py
 ```
 
@@ -85,3 +90,4 @@ python main.py
 - Gmail SMTP를 사용하려면 **앱 비밀번호(App Password)** 가 필요합니다.  
 
 - Gmail 계정에서 **2단계 인증**을 활성화한 뒤, 앱 비밀번호를 발급받아 `.env`의 `SMTP_PASS`에 입력하세요.  
+
