@@ -24,8 +24,7 @@
 
 ---
 
-## 🚀 설치 & 실행 방법
-
+## 🚀 설치 & 실행 방법(터미널 창에 그대로 복사-붙여넣기 해주세요)
 ```bash
 1. 레포지토리 복사
 git clone https://github.com/Hyunseung-Nam/notice-alert-bot.git
@@ -41,22 +40,25 @@ pip install -r requirements.txt
 
 4. 환경변수 설정 (.env 파일 생성)
 # --- Windows PowerShell 5.1 (UTF-8 BOM 없음으로 저장) ---
+$EnvPath = Join-Path -Path (Get-Location).Path -ChildPath ".env"
 $utf8NoBOM = New-Object System.Text.UTF8Encoding($false)
-[System.IO.File]::WriteAllText(".env", @"
+$envContent = @"
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=your@gmail.com
-SMTP_PASS=your_16char_app_password   # Gmail '앱 비밀번호' (일반 비번 X)
-MAIL_TO=target@email.com
-"@, $utf8NoBOM)
+SMTP_USER=[본인 Gmail 주소]
+SMTP_PASS=[앱 비밀번호 16자리]   # Google 계정 > 보안 > 앱 비밀번호에서 발급
+MAIL_TO=[알림을 받을 이메일 주소]
+"@
+[System.IO.File]::WriteAllText($EnvPath, $envContent, $utf8NoBOM)
+"Written: $EnvPath"
 
 # --- macOS / Linux / PowerShell 7+ ---
 cat > .env << 'EOF'
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=your@gmail.com
-SMTP_PASS=your_16char_app_password   # Gmail '앱 비밀번호' (일반 비번 X)
-MAIL_TO=target@email.com
+SMTP_USER=[본인 Gmail 주소]
+SMTP_PASS=[앱 비밀번호 16자리]   # Google 계정 > 보안 > 앱 비밀번호에서 발급
+MAIL_TO=[알림을 받을 이메일 주소]
 EOF
 
 5. 실행
@@ -90,4 +92,5 @@ python main.py
 - Gmail SMTP를 사용하려면 **앱 비밀번호(App Password)** 가 필요합니다.  
 
 - Gmail 계정에서 **2단계 인증**을 활성화한 뒤, 앱 비밀번호를 발급받아 `.env`의 `SMTP_PASS`에 입력하세요.  
+
 
