@@ -27,8 +27,8 @@
 ## 🚀 설치 & 실행 방법(터미널 창에 그대로 복사-붙여넣기 해주세요)
 ```bash
 1. 레포지토리 복사
-git clone https://github.com/Hyunseung-Nam/notice-alert-bot.git
-cd notice-alert-bot
+git clone https://github.com/Hyunseung-Nam/notice_alert_bot.git
+cd notice_alert_bot
 
 2. 가상환경 설정(선택사항이지만 권장)
 python -m venv .venv
@@ -92,5 +92,6 @@ python main.py
 - Gmail SMTP를 사용하려면 **앱 비밀번호(App Password)** 가 필요합니다.  
 
 - Gmail 계정에서 **2단계 인증**을 활성화한 뒤, 앱 비밀번호를 발급받아 `.env`의 `SMTP_PASS`에 입력하세요.  
+
 
 
